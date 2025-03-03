@@ -26,10 +26,10 @@ export default {
 				background: 'hsl(var(--background))',
 				foreground: 'hsl(var(--foreground))',
 				snake: {
-					body: '#1a1f2c',
-					head: '#6E59A5',
-					food: '#8B5CF6',
-					board: '#F6F6F7'
+					body: '#6E59A5', // Updated for better contrast
+					head: '#8B5CF6', // Updated to purple
+					food: '#FF5C8D', // Updated to pink for better visibility
+					board: '#2A2A2A' // Updated to dark gray
 				},
 				primary: {
 					DEFAULT: 'hsl(var(--primary))',

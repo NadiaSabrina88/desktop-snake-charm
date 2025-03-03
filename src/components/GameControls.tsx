@@ -19,12 +19,12 @@ const GameControls: React.FC<GameControlsProps> = ({
   };
 
   return (
-    <div className="mt-8 space-y-6 animate-fade-in">
+    <div className="mt-8 space-y-6 animate-fade-in text-white">
       <div className="flex flex-col items-center gap-3">
         <div className="flex justify-center">
           <button
             onClick={() => handleButtonClick('UP')}
-            className="p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+            className="p-3 rounded-lg hover:bg-[#333333] active:bg-[#444444] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition-colors"
             aria-label="Move Up"
             disabled={isGameOver}
           >
@@ -34,7 +34,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         <div className="flex justify-center gap-12">
           <button
             onClick={() => handleButtonClick('LEFT')}
-            className="p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+            className="p-3 rounded-lg hover:bg-[#333333] active:bg-[#444444] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition-colors"
             aria-label="Move Left"
             disabled={isGameOver}
           >
@@ -42,7 +42,7 @@ const GameControls: React.FC<GameControlsProps> = ({
           </button>
           <button
             onClick={() => handleButtonClick('RIGHT')}
-            className="p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+            className="p-3 rounded-lg hover:bg-[#333333] active:bg-[#444444] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition-colors"
             aria-label="Move Right"
             disabled={isGameOver}
           >
@@ -52,7 +52,7 @@ const GameControls: React.FC<GameControlsProps> = ({
         <div className="flex justify-center">
           <button
             onClick={() => handleButtonClick('DOWN')}
-            className="p-3 rounded-lg hover:bg-gray-100 active:bg-gray-200 focus:outline-none focus:ring-2 focus:ring-gray-300 transition-colors"
+            className="p-3 rounded-lg hover:bg-[#333333] active:bg-[#444444] focus:outline-none focus:ring-2 focus:ring-[#8B5CF6] transition-colors"
             aria-label="Move Down"
             disabled={isGameOver}
           >
@@ -61,33 +61,22 @@ const GameControls: React.FC<GameControlsProps> = ({
         </div>
       </div>
       
-      {isGameOver && (
-        <div className="flex justify-center">
-          <button
-            onClick={onRestart}
-            className="px-6 py-2 bg-snake-head text-white rounded-lg shadow-sm hover:opacity-90 transition-opacity"
-          >
-            Restart Game
-          </button>
-        </div>
-      )}
-      
       <div className="flex gap-4 justify-center mt-6">
         <div className="flex items-center gap-2">
-          <span className="key-hint">↑</span>
-          <span className="text-sm text-gray-600">Up</span>
+          <span className="key-hint bg-[#333333] border-[#444444] text-white">↑</span>
+          <span className="text-sm text-gray-300">Up</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="key-hint">↓</span>
-          <span className="text-sm text-gray-600">Down</span>
+          <span className="key-hint bg-[#333333] border-[#444444] text-white">↓</span>
+          <span className="text-sm text-gray-300">Down</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="key-hint">←</span>
-          <span className="text-sm text-gray-600">Left</span>
+          <span className="key-hint bg-[#333333] border-[#444444] text-white">←</span>
+          <span className="text-sm text-gray-300">Left</span>
         </div>
         <div className="flex items-center gap-2">
-          <span className="key-hint">→</span>
-          <span className="text-sm text-gray-600">Right</span>
+          <span className="key-hint bg-[#333333] border-[#444444] text-white">→</span>
+          <span className="text-sm text-gray-300">Right</span>
         </div>
       </div>
     </div>

@@ -202,16 +202,21 @@ const GameBoard: React.FC = () => {
   
   return (
     <div className="game-container">
-      <h1 className="text-3xl font-medium mb-6 animate-fade-in">Snake Game</h1>
+      <h1 className="text-3xl font-medium mb-6 animate-fade-in text-white">Snake Game</h1>
       
-      <ScoreBoard score={gameState.score} highScore={highScore} />
+      <ScoreBoard 
+        score={gameState.score} 
+        highScore={highScore} 
+        onRestart={handleRestart} 
+        isGameOver={gameState.isGameOver} 
+      />
       
       <div className="game-board-container relative animate-scale-in">
         {isPaused && !gameState.isGameOver && (
-          <div className="absolute inset-0 bg-white bg-opacity-80 flex items-center justify-center z-10 animate-fade-in">
+          <div className="absolute inset-0 bg-[#333333] bg-opacity-80 flex items-center justify-center z-10 animate-fade-in">
             <div className="text-center px-6 py-4 rounded-lg">
-              <h2 className="text-xl font-medium mb-4">Ready to Play?</h2>
-              <p className="text-gray-600 mb-4">
+              <h2 className="text-xl font-medium mb-4 text-white">Ready to Play?</h2>
+              <p className="text-gray-300 mb-4">
                 Use arrow keys or control buttons to start.
               </p>
             </div>
@@ -220,9 +225,9 @@ const GameBoard: React.FC = () => {
         
         {gameState.isGameOver && (
           <div className="game-over-overlay">
-            <div className="bg-white p-6 rounded-lg shadow-lg text-center max-w-xs">
+            <div className="bg-[#333333] p-6 rounded-lg shadow-lg text-center max-w-xs text-white">
               <h2 className="text-xl font-medium mb-2">Game Over!</h2>
-              <p className="text-gray-600 mb-4">
+              <p className="text-gray-300 mb-4">
                 Your score: <span className="font-medium">{gameState.score}</span>
               </p>
             </div>
