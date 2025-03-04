@@ -14,7 +14,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 
-const GRID_SIZE = 20;
+const GRID_SIZE = 25;
 const GAME_SPEED_MS = 150;
 const HIGH_SCORE_KEY = 'snake-game-high-score';
 
@@ -31,13 +31,11 @@ const GameBoard: React.FC = () => {
   const gameLoopRef = useRef<number | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
   
-  // Calculate cell size based on available space
   function calculateCellSize(): number {
-    const defaultSize = isMobile ? 12 : 20; // Smaller cells on mobile
+    const defaultSize = isMobile ? 14 : 22;
     return defaultSize;
   }
   
-  // Recalculate cell size when window resizes
   useEffect(() => {
     function handleResize() {
       if (!boardRef.current) return;
@@ -58,7 +56,6 @@ const GameBoard: React.FC = () => {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
   
-  // Handle keyboard controls
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (gameState.isGameOver) return;
@@ -91,7 +88,6 @@ const GameBoard: React.FC = () => {
           nextDirection: newDirection as Direction
         }));
         
-        // Start game on first input
         if (isPaused) {
           setIsPaused(false);
         }
@@ -102,7 +98,6 @@ const GameBoard: React.FC = () => {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, [gameState.direction, gameState.isGameOver, isPaused]);
   
-  // Game loop
   useEffect(() => {
     if (isPaused || gameState.isGameOver) {
       if (gameLoopRef.current) {
@@ -124,10 +119,8 @@ const GameBoard: React.FC = () => {
         setGameState(prevState => {
           const newState = moveSnake(prevState);
           
-          // Check for game over
           if (!prevState.isGameOver && newState.isGameOver) {
             toast("Game Over!");
-            // Update high score if needed
             if (newState.score > highScore) {
               setHighScore(newState.score);
               localStorage.setItem(HIGH_SCORE_KEY, newState.score.toString());
@@ -135,7 +128,6 @@ const GameBoard: React.FC = () => {
             }
           }
           
-          // Check for score increase
           if (newState.score > prevState.score) {
             toast("Score: " + newState.score);
           }
@@ -156,7 +148,6 @@ const GameBoard: React.FC = () => {
     };
   }, [isPaused, gameState.isGameOver, highScore]);
   
-  // Handle direction change from controls
   const handleDirectionChange = (direction: Direction) => {
     if (gameState.isGameOver) return;
     
@@ -166,21 +157,18 @@ const GameBoard: React.FC = () => {
         nextDirection: direction
       }));
       
-      // Start game on first input
       if (isPaused) {
         setIsPaused(false);
       }
     }
   };
   
-  // Restart game
   const handleRestart = () => {
     setGameState(initializeGame(GRID_SIZE, gameState.cellSize));
     setIsPaused(true);
     toast("Game Restarted!");
   };
 
-  // Calculated board size
   const boardSize = GRID_SIZE * gameState.cellSize;
   
   return (
@@ -200,7 +188,7 @@ const GameBoard: React.FC = () => {
             <div className="text-center px-6 py-4 rounded-lg">
               <h2 className="text-xl font-medium mb-4 text-white">Ready to Play?</h2>
               <p className="text-gray-300 mb-4">
-                {isMobile ? "Use touch controls to start." : "Use arrow keys or control buttons to start."}
+                {isMobile ? "Tap the screen to start and swipe to control." : "Use arrow keys to start and control."}
               </p>
             </div>
           </div>
@@ -231,18 +219,15 @@ const GameBoard: React.FC = () => {
       </div>
       
       {isMobile ? (
-        <MobileControls
-          onDirectionChange={handleDirectionChange}
-          onRestart={handleRestart}
-          isGameOver={gameState.isGameOver}
-        />
-      ) : (
-        <GameControls 
-          onDirectionChange={handleDirectionChange} 
-          onRestart={handleRestart}
-          isGameOver={gameState.isGameOver}
-        />
-      )}
+        <div className="mt-4 w-full">
+          <div 
+            className="touch-controls w-full h-24" 
+            onTouchStart={() => {
+              if (isPaused) setIsPaused(false);
+            }}
+          ></div>
+        </div>
+      ) : null}
     </div>
   );
 };
