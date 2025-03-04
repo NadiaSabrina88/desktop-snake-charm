@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useRef } from 'react';
 import Snake from './Snake';
 import Food from './Food';
-import GameControls from './GameControls';
 import ScoreBoard from './ScoreBoard';
 import MobileControls from './MobileControls';
 import { 
@@ -14,7 +13,7 @@ import {
 import { useIsMobile } from '@/hooks/use-mobile';
 import { toast } from 'sonner';
 
-const GRID_SIZE = 25;
+const GRID_SIZE = 20;
 const GAME_SPEED_MS = 150;
 const HIGH_SCORE_KEY = 'snake-game-high-score';
 
@@ -30,20 +29,31 @@ const GameBoard: React.FC = () => {
   const [isPaused, setIsPaused] = useState<boolean>(true);
   const gameLoopRef = useRef<number | null>(null);
   const boardRef = useRef<HTMLDivElement>(null);
+  const touchStartRef = useRef<Position | null>(null);
+  
+  interface Position {
+    x: number;
+    y: number;
+  }
   
   function calculateCellSize(): number {
-    const defaultSize = isMobile ? 14 : 22;
-    return defaultSize;
+    return isMobile ? 17 : 22;
   }
   
   useEffect(() => {
     function handleResize() {
       if (!boardRef.current) return;
       
-      const boardWidth = boardRef.current.clientWidth;
-      const boardHeight = boardRef.current.clientHeight;
-      const minDimension = Math.min(boardWidth, boardHeight);
-      const newCellSize = Math.floor(minDimension / GRID_SIZE);
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      
+      const availableWidth = viewportWidth * 0.95;
+      const availableHeight = viewportHeight * 0.6;
+      
+      const cellSizeFromWidth = Math.floor(availableWidth / GRID_SIZE);
+      const cellSizeFromHeight = Math.floor(availableHeight / GRID_SIZE);
+      
+      const newCellSize = Math.min(cellSizeFromWidth, cellSizeFromHeight);
       
       setGameState(prev => ({
         ...prev,
@@ -57,7 +67,7 @@ const GameBoard: React.FC = () => {
   }, []);
   
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
+    function handleKeyDown(e: KeyboardEvent) {
       if (gameState.isGameOver) return;
 
       let newDirection: Direction | null = null;
@@ -169,11 +179,51 @@ const GameBoard: React.FC = () => {
     toast("Game Restarted!");
   };
 
+  const handleTouchStart = (e: React.TouchEvent) => {
+    if (gameState.isGameOver) return;
+    
+    const touch = e.touches[0];
+    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
+    
+    if (isPaused) {
+      setIsPaused(false);
+    }
+  };
+  
+  const handleTouchMove = (e: React.TouchEvent) => {
+    if (gameState.isGameOver || !touchStartRef.current) return;
+    
+    e.preventDefault();
+    
+    const touch = e.touches[0];
+    const startX = touchStartRef.current.x;
+    const startY = touchStartRef.current.y;
+    const currentX = touch.clientX;
+    const currentY = touch.clientY;
+    
+    const diffX = currentX - startX;
+    const diffY = currentY - startY;
+    
+    const minSwipeDistance = 30;
+    
+    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
+      handleDirectionChange(diffX > 0 ? 'RIGHT' : 'LEFT');
+      touchStartRef.current = { x: currentX, y: currentY };
+    } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > minSwipeDistance) {
+      handleDirectionChange(diffY > 0 ? 'DOWN' : 'UP');
+      touchStartRef.current = { x: currentX, y: currentY };
+    }
+  };
+  
+  const handleTouchEnd = () => {
+    touchStartRef.current = null;
+  };
+
   const boardSize = GRID_SIZE * gameState.cellSize;
   
   return (
     <div className="game-container">
-      <h1 className="text-3xl font-medium mb-6 animate-fade-in text-white">Snake Game</h1>
+      <h1 className="text-2xl sm:text-3xl font-medium mb-2 sm:mb-4 animate-fade-in text-white">Snake Game</h1>
       
       <ScoreBoard 
         score={gameState.score} 
@@ -186,9 +236,9 @@ const GameBoard: React.FC = () => {
         {isPaused && !gameState.isGameOver && (
           <div className="absolute inset-0 bg-[#333333] bg-opacity-80 flex items-center justify-center z-10 animate-fade-in">
             <div className="text-center px-6 py-4 rounded-lg">
-              <h2 className="text-xl font-medium mb-4 text-white">Ready to Play?</h2>
-              <p className="text-gray-300 mb-4">
-                {isMobile ? "Tap the screen to start and swipe to control." : "Use arrow keys to start and control."}
+              <h2 className="text-xl font-medium mb-2 text-white">Ready to Play?</h2>
+              <p className="text-gray-300 mb-2 text-sm">
+                {isMobile ? "Tap and swipe to control." : "Use arrow keys to start and control."}
               </p>
             </div>
           </div>
@@ -196,9 +246,9 @@ const GameBoard: React.FC = () => {
         
         {gameState.isGameOver && (
           <div className="game-over-overlay">
-            <div className="bg-[#333333] p-6 rounded-lg shadow-lg text-center max-w-xs text-white">
+            <div className="bg-[#333333] p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-xs text-white">
               <h2 className="text-xl font-medium mb-2">Game Over!</h2>
-              <p className="text-gray-300 mb-4">
+              <p className="text-gray-300 mb-2">
                 Your score: <span className="font-medium">{gameState.score}</span>
               </p>
             </div>
@@ -212,22 +262,14 @@ const GameBoard: React.FC = () => {
             width: `${boardSize}px`, 
             height: `${boardSize}px` 
           }}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <Snake segments={gameState.snake} cellSize={gameState.cellSize} />
           <Food position={gameState.food} cellSize={gameState.cellSize} />
         </div>
       </div>
-      
-      {isMobile ? (
-        <div className="mt-4 w-full">
-          <div 
-            className="touch-controls w-full h-24" 
-            onTouchStart={() => {
-              if (isPaused) setIsPaused(false);
-            }}
-          ></div>
-        </div>
-      ) : null}
     </div>
   );
 };

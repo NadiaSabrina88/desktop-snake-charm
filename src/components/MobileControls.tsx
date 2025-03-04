@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React from 'react';
 import { Direction } from '@/lib/gameLogic';
 
 interface MobileControlsProps {
@@ -13,8 +13,7 @@ const MobileControls: React.FC<MobileControlsProps> = ({
   onRestart,
   isGameOver
 }) => {
-  // This component is now minimal - we'll handle swipes in the main GameBoard
-  // This is kept only to maintain the component structure
+  // This component is empty as we handle all touch controls directly in GameBoard
   return null;
 };
 
