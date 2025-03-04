@@ -138,10 +138,6 @@ const GameBoard: React.FC = () => {
             }
           }
           
-          if (newState.score > prevState.score) {
-            toast("Score: " + newState.score);
-          }
-          
           return newState;
         });
       }
