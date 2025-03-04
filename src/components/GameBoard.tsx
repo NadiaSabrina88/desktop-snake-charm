@@ -1,219 +1,47 @@
-import React, { useEffect, useState, useRef } from 'react';
+
+import React from 'react';
 import Snake from './Snake';
 import Food from './Food';
 import ScoreBoard from './ScoreBoard';
-import MobileControls from './MobileControls';
-import { 
-  Direction, 
-  GameState, 
-  initializeGame, 
-  moveSnake, 
-  getOppositeDirection 
-} from '@/lib/gameLogic';
+import GameOverlay from './GameOverlay';
+import KeyboardControls from './KeyboardControls';
+import { useSnakeGame } from '@/hooks/use-snake-game';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { toast } from 'sonner';
+import ResponsiveGameBoard from './ResponsiveGameBoard';
+import TouchControls from './TouchControls';
 
 const GRID_SIZE = 20;
-const GAME_SPEED_MS = 150;
-const HIGH_SCORE_KEY = 'snake-game-high-score';
 
 const GameBoard: React.FC = () => {
   const isMobile = useIsMobile();
-  const [gameState, setGameState] = useState<GameState>(() => 
-    initializeGame(GRID_SIZE, calculateCellSize())
-  );
-  const [highScore, setHighScore] = useState<number>(() => {
-    const saved = localStorage.getItem(HIGH_SCORE_KEY);
-    return saved ? parseInt(saved, 10) : 0;
-  });
-  const [isPaused, setIsPaused] = useState<boolean>(true);
-  const gameLoopRef = useRef<number | null>(null);
-  const boardRef = useRef<HTMLDivElement>(null);
-  const touchStartRef = useRef<Position | null>(null);
-  
-  interface Position {
-    x: number;
-    y: number;
-  }
   
   function calculateCellSize(): number {
     return isMobile ? 17 : 22;
   }
   
-  useEffect(() => {
-    function handleResize() {
-      if (!boardRef.current) return;
-      
-      const viewportWidth = window.innerWidth;
-      const viewportHeight = window.innerHeight;
-      
-      const availableWidth = viewportWidth * 0.95;
-      const availableHeight = viewportHeight * 0.6;
-      
-      const cellSizeFromWidth = Math.floor(availableWidth / GRID_SIZE);
-      const cellSizeFromHeight = Math.floor(availableHeight / GRID_SIZE);
-      
-      const newCellSize = Math.min(cellSizeFromWidth, cellSizeFromHeight);
-      
-      setGameState(prev => ({
-        ...prev,
-        cellSize: newCellSize
-      }));
-    }
-    
-    handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  const {
+    gameState,
+    highScore,
+    isPaused,
+    setIsPaused,
+    handleDirectionChange,
+    handleRestart,
+    touchStartRef,
+    updateCellSize,
+  } = useSnakeGame(GRID_SIZE, calculateCellSize());
   
-  useEffect(() => {
-    function handleKeyDown(e: KeyboardEvent) {
-      if (gameState.isGameOver) return;
-
-      let newDirection: Direction | null = null;
-      
-      switch (e.key) {
-        case 'ArrowUp':
-          newDirection = 'UP';
-          break;
-        case 'ArrowDown':
-          newDirection = 'DOWN';
-          break;
-        case 'ArrowLeft':
-          newDirection = 'LEFT';
-          break;
-        case 'ArrowRight':
-          newDirection = 'RIGHT';
-          break;
-        case ' ': // Space bar to pause/resume
-          setIsPaused(prev => !prev);
-          break;
-        default:
-          break;
-      }
-      
-      if (newDirection && newDirection !== getOppositeDirection(gameState.direction)) {
-        setGameState(prev => ({
-          ...prev,
-          nextDirection: newDirection as Direction
-        }));
-        
-        if (isPaused) {
-          setIsPaused(false);
-        }
-      }
-    };
-    
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.direction, gameState.isGameOver, isPaused]);
+  const { boardRef } = ResponsiveGameBoard({
+    gridSize: GRID_SIZE,
+    updateCellSize
+  });
   
-  useEffect(() => {
-    if (isPaused || gameState.isGameOver) {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
-        gameLoopRef.current = null;
-      }
-      return;
-    }
-    
-    let lastTime = 0;
-    
-    const gameLoop = (timestamp: number) => {
-      if (!lastTime) lastTime = timestamp;
-      const elapsed = timestamp - lastTime;
-      
-      if (elapsed > GAME_SPEED_MS) {
-        lastTime = timestamp;
-        
-        setGameState(prevState => {
-          const newState = moveSnake(prevState);
-          
-          if (!prevState.isGameOver && newState.isGameOver) {
-            toast("Game Over!");
-            if (newState.score > highScore) {
-              setHighScore(newState.score);
-              localStorage.setItem(HIGH_SCORE_KEY, newState.score.toString());
-              toast("New High Score: " + newState.score + "!");
-            }
-          }
-          
-          return newState;
-        });
-      }
-      
-      gameLoopRef.current = requestAnimationFrame(gameLoop);
-    };
-    
-    gameLoopRef.current = requestAnimationFrame(gameLoop);
-    
-    return () => {
-      if (gameLoopRef.current) {
-        cancelAnimationFrame(gameLoopRef.current);
-      }
-    };
-  }, [isPaused, gameState.isGameOver, highScore]);
-  
-  const handleDirectionChange = (direction: Direction) => {
-    if (gameState.isGameOver) return;
-    
-    if (direction !== getOppositeDirection(gameState.direction)) {
-      setGameState(prev => ({
-        ...prev,
-        nextDirection: direction
-      }));
-      
-      if (isPaused) {
-        setIsPaused(false);
-      }
-    }
-  };
-  
-  const handleRestart = () => {
-    setGameState(initializeGame(GRID_SIZE, gameState.cellSize));
-    setIsPaused(true);
-    toast("Game Restarted!");
-  };
-
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if (gameState.isGameOver) return;
-    
-    const touch = e.touches[0];
-    touchStartRef.current = { x: touch.clientX, y: touch.clientY };
-    
-    if (isPaused) {
-      setIsPaused(false);
-    }
-  };
-  
-  const handleTouchMove = (e: React.TouchEvent) => {
-    if (gameState.isGameOver || !touchStartRef.current) return;
-    
-    e.preventDefault();
-    
-    const touch = e.touches[0];
-    const startX = touchStartRef.current.x;
-    const startY = touchStartRef.current.y;
-    const currentX = touch.clientX;
-    const currentY = touch.clientY;
-    
-    const diffX = currentX - startX;
-    const diffY = currentY - startY;
-    
-    const minSwipeDistance = 30;
-    
-    if (Math.abs(diffX) > Math.abs(diffY) && Math.abs(diffX) > minSwipeDistance) {
-      handleDirectionChange(diffX > 0 ? 'RIGHT' : 'LEFT');
-      touchStartRef.current = { x: currentX, y: currentY };
-    } else if (Math.abs(diffY) > Math.abs(diffX) && Math.abs(diffY) > minSwipeDistance) {
-      handleDirectionChange(diffY > 0 ? 'DOWN' : 'UP');
-      touchStartRef.current = { x: currentX, y: currentY };
-    }
-  };
-  
-  const handleTouchEnd = () => {
-    touchStartRef.current = null;
-  };
+  const touchControls = TouchControls({
+    onDirectionChange: handleDirectionChange,
+    isPaused,
+    isGameOver: gameState.isGameOver,
+    touchStartRef,
+    setIsPaused
+  });
 
   const boardSize = GRID_SIZE * gameState.cellSize;
   
@@ -229,27 +57,11 @@ const GameBoard: React.FC = () => {
       />
       
       <div className="game-board-container relative animate-scale-in">
-        {isPaused && !gameState.isGameOver && (
-          <div className="absolute inset-0 bg-[#333333] bg-opacity-80 flex items-center justify-center z-10 animate-fade-in">
-            <div className="text-center px-6 py-4 rounded-lg">
-              <h2 className="text-xl font-medium mb-2 text-white">Ready to Play?</h2>
-              <p className="text-gray-300 mb-2 text-sm">
-                {isMobile ? "Tap and swipe to control." : "Use arrow keys to start and control."}
-              </p>
-            </div>
-          </div>
-        )}
-        
-        {gameState.isGameOver && (
-          <div className="game-over-overlay">
-            <div className="bg-[#333333] p-4 sm:p-6 rounded-lg shadow-lg text-center max-w-xs text-white">
-              <h2 className="text-xl font-medium mb-2">Game Over!</h2>
-              <p className="text-gray-300 mb-2">
-                Your score: <span className="font-medium">{gameState.score}</span>
-              </p>
-            </div>
-          </div>
-        )}
+        <GameOverlay 
+          isPaused={isPaused} 
+          isGameOver={gameState.isGameOver}
+          score={gameState.score}
+        />
         
         <div 
           ref={boardRef}
@@ -258,14 +70,22 @@ const GameBoard: React.FC = () => {
             width: `${boardSize}px`, 
             height: `${boardSize}px` 
           }}
-          onTouchStart={handleTouchStart}
-          onTouchMove={handleTouchMove}
-          onTouchEnd={handleTouchEnd}
+          onTouchStart={touchControls.handleTouchStart}
+          onTouchMove={touchControls.handleTouchMove}
+          onTouchEnd={touchControls.handleTouchEnd}
         >
           <Snake segments={gameState.snake} cellSize={gameState.cellSize} />
           <Food position={gameState.food} cellSize={gameState.cellSize} />
         </div>
       </div>
+      
+      <KeyboardControls 
+        onDirectionChange={handleDirectionChange}
+        currentDirection={gameState.direction}
+        isPaused={isPaused}
+        setIsPaused={setIsPaused}
+        isGameOver={gameState.isGameOver}
+      />
     </div>
   );
 };

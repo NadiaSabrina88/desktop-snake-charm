@@ -8,12 +8,8 @@ interface MobileControlsProps {
   isGameOver: boolean;
 }
 
-const MobileControls: React.FC<MobileControlsProps> = ({ 
-  onDirectionChange, 
-  onRestart,
-  isGameOver
-}) => {
-  // This component is empty as we handle all touch controls directly in GameBoard
+// This component is now replaced by TouchControls.tsx
+const MobileControls: React.FC<MobileControlsProps> = () => {
   return null;
 };
 
