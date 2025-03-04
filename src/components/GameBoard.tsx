@@ -1,9 +1,9 @@
-
 import React, { useEffect, useState, useRef } from 'react';
 import Snake from './Snake';
 import Food from './Food';
 import GameControls from './GameControls';
 import ScoreBoard from './ScoreBoard';
+import MobileControls from './MobileControls';
 import { 
   Direction, 
   GameState, 
@@ -33,10 +33,7 @@ const GameBoard: React.FC = () => {
   
   // Calculate cell size based on available space
   function calculateCellSize(): number {
-    const defaultSize = 20; // Default cell size in pixels
-    const minBoardSize = 320; // Minimum board size
-    
-    // Return default size initially
+    const defaultSize = isMobile ? 12 : 20; // Smaller cells on mobile
     return defaultSize;
   }
   
@@ -186,20 +183,6 @@ const GameBoard: React.FC = () => {
   // Calculated board size
   const boardSize = GRID_SIZE * gameState.cellSize;
   
-  // Check if device is mobile and show message
-  if (isMobile) {
-    return (
-      <div className="game-container">
-        <div className="text-center p-8 max-w-md mx-auto">
-          <h1 className="text-xl font-medium mb-4">Desktop Only</h1>
-          <p className="text-gray-600 mb-6">
-            This snake game is designed for desktop use only. Please open it on a desktop or laptop for the best experience.
-          </p>
-        </div>
-      </div>
-    );
-  }
-  
   return (
     <div className="game-container">
       <h1 className="text-3xl font-medium mb-6 animate-fade-in text-white">Snake Game</h1>
@@ -217,7 +200,7 @@ const GameBoard: React.FC = () => {
             <div className="text-center px-6 py-4 rounded-lg">
               <h2 className="text-xl font-medium mb-4 text-white">Ready to Play?</h2>
               <p className="text-gray-300 mb-4">
-                Use arrow keys or control buttons to start.
+                {isMobile ? "Use touch controls to start." : "Use arrow keys or control buttons to start."}
               </p>
             </div>
           </div>
@@ -247,11 +230,19 @@ const GameBoard: React.FC = () => {
         </div>
       </div>
       
-      <GameControls 
-        onDirectionChange={handleDirectionChange} 
-        onRestart={handleRestart}
-        isGameOver={gameState.isGameOver}
-      />
+      {isMobile ? (
+        <MobileControls
+          onDirectionChange={handleDirectionChange}
+          onRestart={handleRestart}
+          isGameOver={gameState.isGameOver}
+        />
+      ) : (
+        <GameControls 
+          onDirectionChange={handleDirectionChange} 
+          onRestart={handleRestart}
+          isGameOver={gameState.isGameOver}
+        />
+      )}
     </div>
   );
 };

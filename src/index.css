@@ -105,7 +105,7 @@
 /* Custom styles for the snake game */
 @layer components {
   .game-container {
-    @apply max-w-4xl mx-auto p-8 flex flex-col items-center justify-center;
+    @apply max-w-4xl mx-auto p-4 sm:p-8 flex flex-col items-center justify-center;
   }
   
   .game-board {
@@ -113,19 +113,19 @@
   }
   
   .game-cell {
-    @apply absolute rounded-sm transition-all duration-100 ease-in-out;
+    @apply absolute transition-all duration-100 ease-in-out;
   }
   
   .snake-segment {
-    @apply bg-snake-body rounded-sm;
+    @apply bg-snake-body rounded-full border-2 border-[#5D4B95];
   }
   
   .snake-head {
-    @apply bg-snake-head rounded-sm;
+    @apply bg-snake-head rounded-full border-2 border-[#7A4DE0];
   }
   
   .food {
-    @apply bg-snake-food rounded-full animate-pulse-soft;
+    @apply animate-pulse-soft;
   }
   
   .key-hint {
@@ -134,5 +134,16 @@
 
   .game-over-overlay {
     @apply absolute inset-0 bg-black bg-opacity-80 flex items-center justify-center z-10 animate-fade-in;
+  }
+  
+  /* Mobile specific styles */
+  @media (max-width: 640px) {
+    .game-container {
+      @apply p-2;
+    }
+    
+    .key-hint {
+      @apply h-6 min-w-6 px-1 text-xs;
+    }
   }
 }
