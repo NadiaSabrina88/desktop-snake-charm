@@ -37,7 +37,7 @@ const KeyboardControls = ({
           newDirection = 'RIGHT';
           break;
         case ' ': // Space bar to pause/resume
-          setIsPaused(prev => !prev);
+          setIsPaused(!isPaused);
           break;
         default:
           break;

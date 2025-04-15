@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useRef } from 'react';
 import Snake from './Snake';
 import Food from './Food';
 import ScoreBoard from './ScoreBoard';
@@ -7,13 +7,14 @@ import GameOverlay from './GameOverlay';
 import KeyboardControls from './KeyboardControls';
 import { useSnakeGame } from '@/hooks/use-snake-game';
 import { useIsMobile } from '@/hooks/use-mobile';
-import ResponsiveGameBoard from './ResponsiveGameBoard';
-import TouchControls from './TouchControls';
+import { ResponsiveGameBoard } from './ResponsiveGameBoard';
+import { TouchControls } from './TouchControls';
 
 const GRID_SIZE = 20;
 
 const GameBoard: React.FC = () => {
   const isMobile = useIsMobile();
+  const boardRef = useRef<HTMLDivElement>(null);
   
   function calculateCellSize(): number {
     return isMobile ? 17 : 22;
@@ -30,12 +31,14 @@ const GameBoard: React.FC = () => {
     updateCellSize,
   } = useSnakeGame(GRID_SIZE, calculateCellSize());
   
-  const { boardRef } = ResponsiveGameBoard({
+  // Use the responsive game board hook to update cell size based on viewport
+  ResponsiveGameBoard({
     gridSize: GRID_SIZE,
     updateCellSize
   });
   
-  const touchControls = TouchControls({
+  // Get touch control handlers
+  const { handleTouchStart, handleTouchMove, handleTouchEnd } = TouchControls({
     onDirectionChange: handleDirectionChange,
     isPaused,
     isGameOver: gameState.isGameOver,
@@ -70,9 +73,9 @@ const GameBoard: React.FC = () => {
             width: `${boardSize}px`, 
             height: `${boardSize}px` 
           }}
-          onTouchStart={touchControls.handleTouchStart}
-          onTouchMove={touchControls.handleTouchMove}
-          onTouchEnd={touchControls.handleTouchEnd}
+          onTouchStart={handleTouchStart}
+          onTouchMove={handleTouchMove}
+          onTouchEnd={handleTouchEnd}
         >
           <Snake segments={gameState.snake} cellSize={gameState.cellSize} />
           <Food position={gameState.food} cellSize={gameState.cellSize} />

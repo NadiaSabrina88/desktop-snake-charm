@@ -6,10 +6,10 @@ interface ResponsiveGameBoardProps {
   updateCellSize: (size: number) => void;
 }
 
-const ResponsiveGameBoard: React.FC<ResponsiveGameBoardProps> = ({ 
+export function ResponsiveGameBoard({ 
   gridSize, 
   updateCellSize 
-}) => {
+}: ResponsiveGameBoardProps) {
   const boardRef = useRef<HTMLDivElement>(null);
   
   useEffect(() => {
@@ -36,6 +36,6 @@ const ResponsiveGameBoard: React.FC<ResponsiveGameBoardProps> = ({
   }, [gridSize, updateCellSize]);
 
   return { boardRef };
-};
+}
 
 export default ResponsiveGameBoard;

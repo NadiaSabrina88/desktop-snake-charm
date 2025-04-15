@@ -15,13 +15,13 @@ interface TouchControlsProps {
   setIsPaused: (paused: boolean) => void;
 }
 
-const TouchControls: React.FC<TouchControlsProps> = ({ 
+export function TouchControls({ 
   onDirectionChange, 
   isPaused,
   isGameOver,
   touchStartRef,
   setIsPaused
-}) => {
+}: TouchControlsProps) {
   const handleTouchStart = (e: React.TouchEvent) => {
     if (isGameOver) return;
     
@@ -67,6 +67,6 @@ const TouchControls: React.FC<TouchControlsProps> = ({
     handleTouchMove,
     handleTouchEnd
   };
-};
+}
 
 export default TouchControls;
